@@ -11,7 +11,9 @@ import (
 	"strings"
 )
 
-func init() {
+var FlagSet = flag.NewFlagSet("请检查命令行参数", flag.ContinueOnError)
+
+func Init() {
 	m := ManagerFlag{}
 	//命令行参数获取
 	m.initFlag()
@@ -21,7 +23,6 @@ func init() {
 	m.loadCommand()
 	//缓存flag参数
 	m.loadFlag()
-
 	m.printKeyValue()
 }
 
@@ -42,14 +43,13 @@ type ManagerFlag struct {
 }
 
 func (m *ManagerFlag) initFlag() {
-	flag.CommandLine = flag.NewFlagSet("请检查命令行参数", flag.ContinueOnError)
+	flag.CommandLine = FlagSet
 	flag.CommandLine.Usage = func() {
 		_, _ = fmt.Fprintf(os.Stderr, "使用说明 %s:\n\n", "优先级为 环境变量>命令行参数>配置文件，其中环境变量修改后程序不用重启")
 		flag.PrintDefaults()
 	}
 
 	flag.StringVar(&m.Config, "config", "conf/app.properties", "配置文件路径 相对路径或者绝对路径，支持多个文件 可用逗号分割")
-
 	flag.Parse()
 }
 
