@@ -11,19 +11,32 @@ import (
 	"strings"
 )
 
+// 自由变量 flag初始化操作可由使用者自由实现，用来添加其它flag参数
+type FlagHandlerFunc func(f *flag.FlagSet)
+
+type Manager struct {
+	//properties 配置文件路径
+	Config string `json:"config"`
+
+	//yaml配置文件路径 todo
+	//ConfigYaml string `json:"config_yaml"`
+
+	//其它flag可根据通过 自定义函数传递
+	FlagHandlerFunc FlagHandlerFunc
+}
+
+var ManagerSet = &Manager{}
 var FlagSet = flag.NewFlagSet("请检查命令行参数", flag.ContinueOnError)
 
 func Init() {
-	m := ManagerFlag{}
 	//命令行参数获取
-	m.initFlag()
+	ManagerSet.initFlag()
 	//根据命令行参数中的配置路径，文件名称优先级为 环境变量、命令行参数 读取配置文件
-	m.loadConfFile()
+	ManagerSet.loadConfFile()
 	//缓存命令行参数值  符合 -key=value --key=value 格式的命令行参数
-	m.loadCommand()
+	ManagerSet.loadCommand()
 	//缓存flag参数
-	m.loadFlag()
-	m.printKeyValue()
+	ManagerSet.printKeyValue()
 }
 
 //缓存所有的配置参数的结构体
@@ -31,23 +44,16 @@ var confMap = make(map[string]string)
 
 const (
 	//环境变量中制定config路径
-	confFile = "CONFIG_FILE"
+	confFileENV = "CONFIG_FILE"
 )
 
-type ManagerFlag struct {
-	//配置文件路径
-	Config string `json:"config"`
-
-	//可继续添加其它的flag
-	//TODO
-}
-
-func (m *ManagerFlag) initFlag() {
+func (m *Manager) initFlag() {
 	flag.CommandLine = FlagSet
 	flag.CommandLine.Usage = func() {
 		_, _ = fmt.Fprintf(os.Stderr, "使用说明 %s:\n\n", "优先级为 环境变量>命令行参数>配置文件，其中环境变量修改后程序不用重启")
 		flag.PrintDefaults()
 	}
+	m.FlagHandlerFunc(flag.CommandLine)
 
 	flag.StringVar(&m.Config, "config", "conf/app.properties", "配置文件路径 相对路径或者绝对路径，支持多个文件 可用逗号分割")
 	flag.Parse()
@@ -152,7 +158,7 @@ func loadConfigFromFile(path string) {
 }
 
 //The command line
-func (m *ManagerFlag) loadCommand() {
+func (m *Manager) loadCommand() {
 	for _, v := range os.Args {
 		constrainFlag := strings.Contains(v, "=")
 
@@ -167,8 +173,8 @@ func (m *ManagerFlag) loadCommand() {
 	}
 
 }
-func (m *ManagerFlag) loadConfFile() {
-	confFileName, ok := os.LookupEnv(confFile)
+func (m *Manager) loadConfFile() {
+	confFileName, ok := os.LookupEnv(confFileENV)
 	if ok {
 		paths := strings.Split(confFileName, ",")
 		for _, v := range paths {
@@ -183,7 +189,7 @@ func (m *ManagerFlag) loadConfFile() {
 	}
 }
 
-func (m *ManagerFlag) printKeyValue() {
+func (m *Manager) printKeyValue() {
 	log.Println("----------------")
 	log.Println("当前配置信息:")
 	for key, value := range confMap {
@@ -192,6 +198,6 @@ func (m *ManagerFlag) printKeyValue() {
 	log.Println("----------------")
 }
 
-func (m *ManagerFlag) loadFlag() {
+func (m *Manager) loadFlag() {
 	SetValue("config", m.Config)
 }
