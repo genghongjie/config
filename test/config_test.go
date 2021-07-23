@@ -21,3 +21,7 @@ func TestInit(t *testing.T) {
 	config.Init()
 	fmt.Println("my name is " + name)
 }
+
+func TestInit_init(t *testing.T) {
+	config.Init()
+}
