@@ -53,7 +53,9 @@ func (m *Manager) initFlag() {
 		_, _ = fmt.Fprintf(os.Stderr, "使用说明 %s:\n\n", "优先级为 环境变量>命令行参数>配置文件，其中环境变量修改后程序不用重启")
 		flag.PrintDefaults()
 	}
-	m.FlagHandlerFunc(flag.CommandLine)
+	if m.FlagHandlerFunc != nil {
+		m.FlagHandlerFunc(flag.CommandLine)
+	}
 
 	flag.StringVar(&m.Config, "config", "conf/app.properties", "配置文件路径 相对路径或者绝对路径，支持多个文件 可用逗号分割")
 	flag.Parse()
