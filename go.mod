@@ -1,3 +1,3 @@
-module  github.com/genghongjie/config
+module github.com/genghongjie/config
 
 go 1.16
