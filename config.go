@@ -59,6 +59,11 @@ func (m *Manager) initFlag() {
 
 	flag.StringVar(&m.Config, "config", "conf/app.properties", "配置文件路径 相对路径或者绝对路径，支持多个文件 可用逗号分割")
 	flag.Parse()
+
+	flag.VisitAll(getFlagValue)
+}
+func getFlagValue(f *flag.Flag) {
+	SetValue(f.Name, f.Value.String())
 }
 
 //设置配置信息
