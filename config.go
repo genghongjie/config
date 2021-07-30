@@ -167,6 +167,12 @@ func loadConfigFromFile(path string) {
 //The command line
 func (m *Manager) loadCommand() {
 	for _, v := range os.Args {
+		if v == "--h" || v == "-h" || v == "-help" || v == "--help" {
+			m.printKeyValue()
+			os.Exit(0)
+		}
+	}
+	for _, v := range os.Args {
 		constrainFlag := strings.Contains(v, "=")
 
 		if constrainFlag && strings.Count(v, "=") == 1 {
@@ -197,10 +203,10 @@ func (m *Manager) loadConfFile() {
 }
 
 func (m *Manager) printKeyValue() {
-	log.Println("----------------")
 	log.Println("当前配置信息:")
+	log.Println("----------------")
 	for key, value := range confMap {
-		log.Println(fmt.Sprintf(" %s:%s", key, value))
+		log.Println(fmt.Sprintf(">> %s : %s", key, value))
 	}
 	log.Println("----------------")
 }
