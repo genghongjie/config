@@ -35,7 +35,7 @@ func Init() {
 	ManagerSet.loadConfFile()
 	//缓存命令行参数值  符合 -key=value --key=value 格式的命令行参数
 	ManagerSet.loadCommand()
-	//缓存flag参数
+	//打印配置参数 key:value
 	ManagerSet.printKeyValue()
 }
 
